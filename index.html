@@ -12,7 +12,12 @@
 </head>
 <body>
     <canvas id="game" width="400" height="400"></canvas>
-    <div id="game-over-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,0,0,0.7);z-index:10;justify-content:center;align-items:center;"><div style="background:#222;padding:40px 60px;border-radius:20px;box-shadow:0 0 20px #000;text-align:center;"><span style="font-size:2em;color:#fff;">Snake died :(</span></div></div>
+    <div id="game-over-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,0,0,0.7);z-index:10;justify-content:center;align-items:center;">
+      <div style="background:#222;padding:40px 60px;border-radius:20px;box-shadow:0 0 20px #000;text-align:center;">
+        <span style="font-size:2em;color:#fff;">Snake died :(</span><br>
+        <span style="font-size:1.2em;color:#fff;margin-top:20px;display:block;">Press space to alive your snake</span>
+      </div>
+    </div>
     <script>
         const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
