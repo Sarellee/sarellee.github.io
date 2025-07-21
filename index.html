@@ -12,6 +12,7 @@
 </head>
 <body>
     <canvas id="game" width="400" height="400"></canvas>
+    <div id="game-over-popup" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.6);z-index:10;justify-content:center;align-items:center;"><div style="background:#222;padding:40px 60px;border-radius:20px;box-shadow:0 0 20px #000;text-align:center;"><span style="font-size:2em;color:#fff;">Snake died :(</span></div></div>
     <script>
         const canvas = document.getElementById('game');
         const ctx = canvas.getContext('2d');
@@ -131,6 +132,7 @@
             // Check collision with walls
             if (head.x < 0 || head.x >= canvas.width / gridSize || head.y < 0 || head.y >= canvas.height / gridSize) {
                 gameOver = true;
+                showGameOverPopup();
                 if (score > highestScore) {
                     highestScore = score;
                     localStorage.setItem('snake_highest_score', highestScore);
@@ -141,6 +143,7 @@
             // Check collision with self
             if (snake.some(seg => seg.x === head.x && seg.y === head.y)) {
                 gameOver = true;
+                showGameOverPopup();
                 if (score > highestScore) {
                     highestScore = score;
                     localStorage.setItem('snake_highest_score', highestScore);
@@ -199,7 +202,11 @@
             bomb = null;
             clearBombTimers();
             placeFood();
+            document.getElementById('game-over-popup').style.display = 'none';
             gameLoop();
+        function showGameOverPopup() {
+            document.getElementById('game-over-popup').style.display = 'flex';
+        }
         function spawnBomb() {
             // Place bomb at random location not occupied by snake or food
             let newBomb;
