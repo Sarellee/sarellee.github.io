@@ -22,6 +22,9 @@
         let gameOver = false;
         let score = 0;
         let highestScore = Number(localStorage.getItem('snake_highest_score')) || 0;
+        let bomb = null;
+        let bombTimeout = null;
+        let bombInterval = null;
 
         function draw() {
             ctx.fillStyle = '#111';
@@ -78,6 +81,30 @@
             ctx.lineTo(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2 - gridSize / 1.5);
             ctx.stroke();
             ctx.lineWidth = 1;
+            // Draw bomb if present
+            if (bomb) {
+                ctx.beginPath();
+                ctx.arc(
+                    bomb.x * gridSize + gridSize / 2,
+                    bomb.y * gridSize + gridSize / 2,
+                    gridSize / 2.3,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fillStyle = '#333';
+                ctx.shadowColor = '#ff0';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.shadowBlur = 0;
+                // Draw bomb fuse
+                ctx.beginPath();
+                ctx.strokeStyle = '#fff';
+                ctx.lineWidth = 2;
+                ctx.moveTo(bomb.x * gridSize + gridSize / 2, bomb.y * gridSize + gridSize / 2 - gridSize / 2.3);
+                ctx.lineTo(bomb.x * gridSize + gridSize / 2, bomb.y * gridSize + gridSize / 2 - gridSize / 1.5);
+                ctx.stroke();
+                ctx.lineWidth = 1;
+            }
             // Draw score
             ctx.fillStyle = '#fff';
             ctx.font = '20px Arial';
@@ -108,6 +135,7 @@
                     highestScore = score;
                     localStorage.setItem('snake_highest_score', highestScore);
                 }
+                clearBombTimers();
                 return;
             }
             // Check collision with self
@@ -117,9 +145,19 @@
                     highestScore = score;
                     localStorage.setItem('snake_highest_score', highestScore);
                 }
+                clearBombTimers();
                 return;
             }
             snake.unshift(head);
+            // Check bomb collision
+            if (bomb && head.x === bomb.x && head.y === bomb.y) {
+                score -= 2;
+                bomb = null;
+                if (bombTimeout) {
+                    clearTimeout(bombTimeout);
+                    bombTimeout = null;
+                }
+            }
             // Check food
             if (head.x === food.x && head.y === food.y) {
                 score++;
@@ -158,8 +196,43 @@
             direction = {x: 1, y: 0};
             score = 0;
             gameOver = false;
+            bomb = null;
+            clearBombTimers();
             placeFood();
             gameLoop();
+        function spawnBomb() {
+            // Place bomb at random location not occupied by snake or food
+            let newBomb;
+            do {
+                newBomb = {
+                    x: Math.floor(Math.random() * canvas.width / gridSize),
+                    y: Math.floor(Math.random() * canvas.height / gridSize)
+                };
+            } while (
+                snake.some(seg => seg.x === newBomb.x && seg.y === newBomb.y) ||
+                (food.x === newBomb.x && food.y === newBomb.y)
+            );
+            bomb = newBomb;
+            // Remove bomb after 10 seconds
+            bombTimeout = setTimeout(() => {
+                bomb = null;
+                bombTimeout = null;
+            }, 10000);
+        }
+
+        function clearBombTimers() {
+            if (bombTimeout) {
+                clearTimeout(bombTimeout);
+                bombTimeout = null;
+            }
+            if (bombInterval) {
+                clearInterval(bombInterval);
+                bombInterval = null;
+            }
+        }
+
+        // Start bomb interval
+        bombInterval = setInterval(spawnBomb, 60000); // Every 60 seconds
         }
         gameLoop();
     </script>
